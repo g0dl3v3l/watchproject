@@ -113,7 +113,7 @@ public class MainActivity extends FragmentActivity
     private Button mButtonReset;
     private boolean mTimerRunning;
 
-    private static final long START_TIME_IN_MILLIS= 30000; //5m
+    private static final long START_TIME_IN_MILLIS= 6000; //5m
     private long mTimeLeftInMillis = START_TIME_IN_MILLIS;
     Vibrator vibrator;
     int temp = 0;
@@ -165,7 +165,8 @@ public class MainActivity extends FragmentActivity
 
             mGyro = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
             mSensorManager.registerListener(this, mGyro, SensorManager.SENSOR_DELAY_FASTEST);
-//        mLina = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
+        mLina = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
+        mSensorManager.registerListener(this, mLina, SensorManager.SENSOR_DELAY_FASTEST);
 //        mRot = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
             accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -289,7 +290,7 @@ public class MainActivity extends FragmentActivity
         record.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                permission_to_record = true;
+               // permission_to_record = true;
 
                 if (record.getText() != "pause") {
                     getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
@@ -371,6 +372,17 @@ public class MainActivity extends FragmentActivity
         mCountDownTimer = new CountDownTimer(mTimeLeftInMillis, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
+                if((START_TIME_IN_MILLIS - millisUntilFinished)/1000 == 2){
+
+
+                    permission_to_record = true;
+                    Toast.makeText(MainActivity.this, "recording started", Toast.LENGTH_SHORT).show();
+                }
+                if((millisUntilFinished)/1000 == 2){
+                    permission_to_record = false;
+                    Toast.makeText(MainActivity.this, "recording stopped", Toast.LENGTH_SHORT).show();
+                }
+
                 mTimeLeftInMillis = millisUntilFinished;
                 updateCountDownText();
 
@@ -386,6 +398,7 @@ public class MainActivity extends FragmentActivity
                 Toast.makeText(MainActivity.this, "File Created & Saved", Toast.LENGTH_SHORT).show();
                 Toast.makeText(MainActivity.this, "Touch screen enabled", Toast.LENGTH_SHORT).show();
                 // File management
+                sendSensorData("done!");
                 timePeriod = 0;
                 resetTimer();
 
@@ -562,19 +575,19 @@ public class MainActivity extends FragmentActivity
             g_Mag = String.valueOf(decfor.format(Mag_gyro));
 
         }
-//        if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
-//
-//            x_lin = event.values[0];
-//            y_lin = event.values[1];
-//            z_lin = event.values[2];
-//
-//            xL_val = String.valueOf(event.values[0]);
-//            yL_val = String.valueOf(event.values[1]);
-//            zL_val = String.valueOf(event.values[2]);
-////            Mag_lin = Math.sqrt(Math.pow(x_lin,2)+Math.pow(y_lin,2)+Math.pow(z_lin,2));
-////            l_Mag = String.valueOf(Mag_lin);
-//
-//        }
+        if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
+
+            x_lin = event.values[0];
+            y_lin = event.values[1];
+            z_lin = event.values[2];
+
+            xL_val = String.valueOf(event.values[0]);
+            yL_val = String.valueOf(event.values[1]);
+            zL_val = String.valueOf(event.values[2]);
+            Mag_lin = Math.sqrt(Math.pow(x_lin,2)+Math.pow(y_lin,2)+Math.pow(z_lin,2));
+            l_Mag = String.valueOf(Mag_lin);
+
+        }
 //        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
 //
 //            x_magno = event.values[0];
@@ -599,13 +612,13 @@ public class MainActivity extends FragmentActivity
         }
 
         if (CounterForSave<SamplingRate & permission_to_record) {
-            DATA = dateCurrent + "," + x_val+ "," + y_val + "," + z_val + "," + xG_val +","+yG_val+","+zG_val+","+ a_Mag +","+g_Mag+","+timePeriod+","+activityInput+"\n"; //"DATE,TIME,WALK,JUMP,STATIC,FALLDOWN\n"
+            DATA = dateCurrent + "," + x_val+ "," + y_val + "," + z_val + "," + xG_val +","+yG_val+","+zG_val+","+ a_Mag +","+g_Mag+","+xL_val+","+yL_val+","+zL_val+","+l_Mag+","+timePeriod+","+activityInput+"\n"; //"DATE,TIME,WALK,JUMP,STATIC,FALLDOWN\n"
 //            List<org.bson.Document> sensorData = Arrays.asList(
 //                    new org.bson.Document().append("data Current", dateCurrent).append("x_val", x_val).append("y_val", y_val).append("z_val", z_val).append("xG_val", xG_val).append("yG_val", yG_val).append("zG_val", zG_val).append("a_Mag", a_Mag).append("g_Mag", g_Mag));
             modified_DATA = newline + DATA;
             newline = modified_DATA;
             CounterForSave = CounterForSave +1;
-            buffer.append(dateCurrent).append(",").append(x_val).append(",").append(y_val).append(",").append(z_val).append(",").append(xG_val).append(",").append(a_Mag).append(",").append(timePeriod).append(",").append("\n");
+            buffer.append(dateCurrent).append(",").append(x_val).append(",").append(y_val).append(",").append(z_val).append(",").append(xG_val).append(",").append(a_Mag).append(",").append(xL_val).append(",").append(yL_val).append(",").append(zL_val).append(",").append(l_Mag).append(",").append(timePeriod).append(",").append("\n");
 
 
             //Packet packet = new Packet(DATA.length(), DATA);
@@ -654,6 +667,26 @@ public class MainActivity extends FragmentActivity
             }
             try {
                    data1.put("g_Mag", g_Mag);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            try {
+                data1.put("xL_val", xL_val);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            try {
+                data1.put("yL_val", yL_val);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            try {
+                data1.put("zL_val", zL_val);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            try {
+                data1.put("l_Mag", l_Mag);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -812,6 +845,7 @@ public class MainActivity extends FragmentActivity
     }
     private class ConnectToServerTask extends AsyncTask<Void, Void, Void> {
         private MainActivity mActivity;
+
         public ConnectToServerTask(MainActivity activity) {
             mActivity = activity;
         }
@@ -819,16 +853,20 @@ public class MainActivity extends FragmentActivity
         @Override
         protected Void doInBackground(Void... voids) {
             final long RETRY_INTERVAL_MS = 5000;
-            try {
-                socket = new Socket("172.20.10.2", 5000);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            while (socket == null) {
+                try {
+                    //socket = new Socket("172.20.10.2", 5000);
+                    socket = new Socket("192.168.0.100", 5000);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
-            try {
-                Thread.sleep(RETRY_INTERVAL_MS);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                try {
+                    Thread.sleep(RETRY_INTERVAL_MS);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
             }
             return null;
         }
