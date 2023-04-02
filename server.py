@@ -3,6 +3,7 @@ import struct
 import unicodedata
 import csv
 import json
+
 try:
     from types import SimpleNamespace as Namespace
 except ImportError:
@@ -12,7 +13,8 @@ except ImportError:
 data_size = 138 # sending 16 bytes = 128 bits (binary touch states, for example)
 
 # server settings
-server_name = "192.168.0.100"
+#server_name = "192.168.0.100"
+server_name = "172.20.10.3"
 server_port = 5000
 server_address = (server_name, server_port)
 x_val = 0
@@ -30,10 +32,9 @@ print ('Connected to:', client_address)
 
 count = 0
 
-final_data = []
-
+session = 12
 while True:
-
+    final_data = []
     while True:
         # read length of data (4 bytes)
         try:
@@ -73,17 +74,18 @@ while True:
 
             a_norm_str = unicodedata.normalize('NFKD', result_obj.a_Mag).encode('ascii', 'ignore')
             g_norm_str = unicodedata.normalize('NFKD', result_obj.g_Mag).encode('ascii', 'ignore')
-            a_norm_str = unicodedata.normalize('NFKD', result_obj.l_Mag).encode('ascii', 'ignore')
-            final_data.append([float(a_x_str), float(a_y_str), float(a_y_str), float(g_x_str), float(g_y_str), float(g_y_str), float(a_norm_str), float(g_norm_str)])
+            l_norm_str = unicodedata.normalize('NFKD', result_obj.l_Mag).encode('ascii', 'ignore')
+            final_data.append([float(a_x_str), float(a_y_str),float(a_z_str) ,float(g_x_str), float(g_y_str),float(x_L_str),float(y_L_str),float(z_L_str), float(g_z_str), float(a_norm_str), float(g_norm_str), float(l_norm_str)])
             print(final_data)
         
         except:
             continue
     
     print("Session done")
-    
-    with open("new_file.csv","w+") as my_csv:
+    session+= 1
+    with open("ok/new_file"+str(session)+".csv","w+") as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(final_data)
     print("file saved")
-    
+
+

@@ -113,7 +113,7 @@ public class MainActivity extends FragmentActivity
     private Button mButtonReset;
     private boolean mTimerRunning;
 
-    private static final long START_TIME_IN_MILLIS= 6000; //5m
+    private static final long START_TIME_IN_MILLIS= 10000; //5m/**/
     private long mTimeLeftInMillis = START_TIME_IN_MILLIS;
     Vibrator vibrator;
     int temp = 0;
@@ -855,8 +855,8 @@ public class MainActivity extends FragmentActivity
             final long RETRY_INTERVAL_MS = 5000;
             while (socket == null) {
                 try {
-                    //socket = new Socket("172.20.10.2", 5000);
-                    socket = new Socket("192.168.0.100", 5000);
+                    socket = new Socket("172.20.10.3", 5000);
+                    //socket = new Socket("192.168.0.100", 5000);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
