@@ -13,8 +13,8 @@ except ImportError:
 data_size = 138 # sending 16 bytes = 128 bits (binary touch states, for example)
 
 # server settings
-#server_name = "192.168.0.100"
-server_name = "172.20.10.3"
+server_name = "192.168.0.100"
+#server_name = "172.20.10.3"
 server_port = 5000
 server_address = (server_name, server_port)
 x_val = 0
@@ -32,7 +32,7 @@ print ('Connected to:', client_address)
 
 count = 0
 
-session = 12
+session = 0
 while True:
     final_data = []
     while True:
@@ -83,7 +83,7 @@ while True:
     
     print("Session done")
     session+= 1
-    with open("ok/new_file"+str(session)+".csv","w+") as my_csv:
+    with open("hi/new_file"+str(session)+".csv","w+") as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(final_data)
     print("file saved")
